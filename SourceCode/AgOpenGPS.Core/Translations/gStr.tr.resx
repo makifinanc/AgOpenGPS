@@ -198,7 +198,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>AgIO Oto. Başlat</value>
   </data>
   <data name="gsAutoSteer" xml:space="preserve">
-    <value>Oto. Dümenleme</value>
+    <value>Oto_Dümenleme</value>
   </data>
   <data name="gsAutoSteerConfiguration" xml:space="preserve">
     <value>Otomatik Dümenleme Ayarları</value>
@@ -399,7 +399,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Discourse Forum</value>
   </data>
   <data name="gsDisplay" xml:space="preserve">
-    <value>Görünüm</value>
+    <value>Göster</value>
   </data>
   <data name="gsDistance" xml:space="preserve">
     <value>Mesafe</value>
@@ -480,7 +480,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Ek Kılavuz Hatları</value>
   </data>
   <data name="gsFactor" xml:space="preserve">
-    <value>Ayarlanan Katsayı</value>
+    <value>Katsayı</value>
   </data>
   <data name="gsFast" xml:space="preserve">
     <value>Hızlı</value>
@@ -603,7 +603,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Üçgen</value>
   </data>
   <data name="gsImuFusion" xml:space="preserve">
-    <value>Yön Hesaplama</value>
+    <value>Yön Hesabı</value>
   </data>
   <data name="gsInches" xml:space="preserve">
     <value>İnç</value>
@@ -621,7 +621,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Röle Tetiklemesini Tersine Çevir</value>
   </data>
   <data name="gsInvertMotor" xml:space="preserve">
-    <value>Motoru Tersine Çevir</value>
+    <value>Motoru Ters Çevir</value>
   </data>
   <data name="gsInvertRelays" xml:space="preserve">
     <value>Röleyi Tersine Çevir</value>
@@ -693,7 +693,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Bing Haritasını Arka Plan Olarak Ekle</value>
   </data>
   <data name="gsMaxLimit" xml:space="preserve">
-    <value>Direksiyon Motoru Hız Limiti</value>
+    <value>Direksiyon Hız Limiti PWM</value>
   </data>
   <data name="gsMaxSpeed" xml:space="preserve">
     <value>Maksimum Hız</value>
@@ -708,7 +708,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Minimum Hız</value>
   </data>
   <data name="gsMinToMove" xml:space="preserve">
-    <value>Direksiyon Hareketi için Minimum Güç</value>
+    <value>Minimum Güç PWM</value>
   </data>
   <data name="gsMissingABLinesFile" xml:space="preserve">
     <value>AB Hat Dosyaları Bulunamadı</value>
@@ -792,7 +792,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Ofset Düzeltme</value>
   </data>
   <data name="gsOn" xml:space="preserve">
-    <value>Tümünü Görüntüle</value>
+    <value>Boyamayı Aç</value>
   </data>
   <data name="gsOnDelay" xml:space="preserve">
     <value>Sapma Gecikmesi</value>
@@ -801,7 +801,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Şeffaflık</value>
   </data>
   <data name="gsOpen" xml:space="preserve">
-    <value>Boyama Aç</value>
+    <value>Tümünü Görüntüle</value>
   </data>
   <data name="gsOuter" xml:space="preserve">
     <value>Dış Sınır</value>
@@ -828,7 +828,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Pivot</value>
   </data>
   <data name="gsPivotDistance" xml:space="preserve">
-    <value>Antenin-Arka Aks Mesafesi</value>
+    <value>Anten-Arka Aks</value>
   </data>
   <data name="gsPixel" xml:space="preserve">
     <value>Işık Çubuğu</value>
@@ -855,7 +855,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Poligonlar</value>
   </data>
   <data name="gsPowerLoss" xml:space="preserve">
-    <value>Şartel Kapanınca Cihazı Kapat</value>
+    <value>Cihazı Şartelle Kapat</value>
   </data>
   <data name="gsPresetColor" xml:space="preserve">
     <value>Önceden Ayarlanmış Rengi Seç</value>
@@ -1074,7 +1074,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Dümenleme Grafiği</value>
   </data>
   <data name="gsSteerEnable" xml:space="preserve">
-    <value>Dümenlenlemeyi Aktif Et</value>
+    <value>Dümen Tetiği </value>
   </data>
   <data name="gsSteerInReverse" xml:space="preserve">
     <value>Geri Giderken Dümenleme</value>
