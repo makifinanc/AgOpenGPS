@@ -207,7 +207,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Otomatik Dümenleme Portu</value>
   </data>
   <data name="gsAutoSwitchDualFix" xml:space="preserve">
-    <value>Oto. Çift Anten + IMU <> Fix</value>
+    <value>Oto. Çift Anten + IMU (Fix)</value>
   </data>
   <data name="gsAutoSwitchDualFixSpeed" xml:space="preserve">
     <value>Geçiş Hızı</value>
