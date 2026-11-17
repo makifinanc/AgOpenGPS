@@ -198,7 +198,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>AgIO Oto. Başlat</value>
   </data>
   <data name="gsAutoSteer" xml:space="preserve">
-    <value>Oto_Dümenleme</value>
+    <value>Dümenleme</value>
   </data>
   <data name="gsAutoSteerConfiguration" xml:space="preserve">
     <value>Otomatik Dümenleme Ayarları</value>
@@ -405,7 +405,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Mesafe</value>
   </data>
   <data name="gsDistanceToFlag" xml:space="preserve">
-    <value>Antenden-Bayrağa</value>
+    <value>Antene Uzaklık</value>
   </data>
   <data name="gsDownloadAll" xml:space="preserve">
     <value>Hepsini İndir</value>
@@ -747,7 +747,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Varsayılan Ayarlar ile Yenisini Oluştur</value>
   </data>
   <data name="gsNextGuidanceLine" xml:space="preserve">
-    <value>Sonraki Kılavuz Hattına Geçiş</value>
+    <value>Sonraki Kılavuz Hattı</value>
   </data>
   <data name="gsNight" xml:space="preserve">
     <value>Gece</value>
@@ -780,10 +780,10 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Hat Kaydırma</value>
   </data>
   <data name="gsNudgeRefTrack" xml:space="preserve">
-    <value>Hattı Kalıcı Olarak Kaydır</value>
+    <value>Hattı Kalıcı Olarak Yarım veya Tam Kaydır</value>
   </data>
   <data name="gsOff" xml:space="preserve">
-    <value>Boyamayı Kapat</value>
+    <value>Kapat</value>
   </data>
   <data name="gsOffset" xml:space="preserve">
     <value>Ofset</value>
@@ -792,7 +792,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Ofset Düzeltme</value>
   </data>
   <data name="gsOn" xml:space="preserve">
-    <value>Boyamayı Aç</value>
+    <value>Aç</value>
   </data>
   <data name="gsOnDelay" xml:space="preserve">
     <value>Sapma Gecikmesi</value>
@@ -834,7 +834,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Işık Çubuğu</value>
   </data>
   <data name="gsPlantPop" xml:space="preserve">
-    <value>Sınır dışında boyamayı kapatır.</value>
+    <value>(Sınır dışında da).</value>
   </data>
   <data name="gsPleaseEnterABLine" xml:space="preserve">
     <value>Lütfen AB Hattı Girin</value>
@@ -843,7 +843,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Lütfen bekleyin</value>
   </data>
   <data name="gsPoint" xml:space="preserve">
-    <value>Koordinat</value>
+    <value>Nokta</value>
   </data>
   <data name="gsPoints" xml:space="preserve">
     <value>Noktalar</value>
@@ -1068,13 +1068,13 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Direksiyon Açısı</value>
   </data>
   <data name="gsSteerBar" xml:space="preserve">
-    <value>Tepki_Çubuğu</value>
+    <value>Tepki Çubuğu</value>
   </data>
   <data name="gsSteerChart" xml:space="preserve">
     <value>Dümenleme Grafiği</value>
   </data>
   <data name="gsSteerEnable" xml:space="preserve">
-    <value>Dümen Tetiği </value>
+    <value>Dümenleme Tetiği </value>
   </data>
   <data name="gsSteerInReverse" xml:space="preserve">
     <value>Geri Giderken Dümenleme</value>
@@ -1143,7 +1143,7 @@ TÜM KULLANIM SORUMLULUĞU SİZE AİTTİR</value>
     <value>Detaylı İz Hattı Oluştur</value>
   </data>
   <data name="gsTramWidth" xml:space="preserve">
-    <value>İz Hat Genişliği</value>
+    <value>İz Mesafesi</value>
   </data>
   <data name="gsTurnABCurveOn" xml:space="preserve">
     <value>Turn AB Curve On</value>
