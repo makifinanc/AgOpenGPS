@@ -279,7 +279,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Bir Başkasını Seç veya Oluştur</value>
   </data>
   <data name="gsClipLine" xml:space="preserve">
-    <value>Hattı Kırp</value>
+    <value>Hat Boyunca Kırp</value>
   </data>
   <data name="gsClose" xml:space="preserve">
     <value>Kapat</value>
