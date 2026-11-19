@@ -139,7 +139,7 @@
     <value>Yakalama</value>
   </data>
   <data name="gsAcquireFactor" xml:space="preserve">
-    <value>Hattı Yakalama Faktörü</value>
+    <value>Hattı Yakalama Katsayısı (0,9)</value>
   </data>
   <data name="gsActionHasBeenCancelled" xml:space="preserve">
     <value>İşlem İptal Edildi</value>
@@ -240,7 +240,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Tarla Zaten Yüklü</value>
   </data>
   <data name="gsButton" xml:space="preserve">
-    <value>Buton</value>
+    <value>Button</value>
   </data>
   <data name="gsButtonDescription" xml:space="preserve">
     <value>Basınca Aç/Kapat</value>
@@ -687,7 +687,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Manuel</value>
   </data>
   <data name="gsManualTurns" xml:space="preserve">
-    <value>Manuel Dönüşler için Hız Sınırı</value>
+    <value>Dönüşler için Hız Limiti</value>
   </data>
   <data name="gsMapForBackground" xml:space="preserve">
     <value>Bing Haritasını Arka Plan Olarak Ekle</value>
@@ -780,7 +780,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Hat Kaydırma</value>
   </data>
   <data name="gsNudgeRefTrack" xml:space="preserve">
-    <value>Hattı Kalıcı Olarak Yarım veya Tam Kaydır</value>
+    <value>Hattı Kalıcı Olarak Kaydır ve Dosyala</value>
   </data>
   <data name="gsOff" xml:space="preserve">
     <value>Kapat</value>
@@ -795,7 +795,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Aç</value>
   </data>
   <data name="gsOnDelay" xml:space="preserve">
-    <value>Sapma Gecikmesi</value>
+    <value>Tepkisizlik Gecikmesi</value>
   </data>
   <data name="gsOpacity" xml:space="preserve">
     <value>Şeffaflık</value>
@@ -1044,7 +1044,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Aralık</value>
   </data>
   <data name="gsSpeedFactor" xml:space="preserve">
-    <value>Hız Katsayısı</value>
+    <value>Hız Katsayısı (1,5)</value>
   </data>
   <data name="gsSpeedo" xml:space="preserve">
     <value>Hız Göstergesi</value>
@@ -1080,7 +1080,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Geri Giderken Dümenleme</value>
   </data>
   <data name="gsSteerResponse" xml:space="preserve">
-    <value>Dümenleme Tepkisi</value>
+    <value>Dümenleme Tepkisi (3)</value>
   </data>
   <data name="gsSteerSwitch" xml:space="preserve">
     <value>Oto. Dümenleme Butonu</value>
@@ -1095,7 +1095,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Yön Oku</value>
   </data>
   <data name="gsSwitch" xml:space="preserve">
-    <value>Anahtar</value>
+    <value>Switch</value>
   </data>
   <data name="gsSwitchDescription" xml:space="preserve">
     <value>Kutuplu Aç, Kapat</value>
