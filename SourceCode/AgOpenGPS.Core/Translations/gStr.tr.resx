@@ -1233,7 +1233,7 @@ TÜM KULLANIM SORUMLULUĞU SİZE AİTTİR</value>
     <value>Ünite</value>
   </data>
   <data name="gsZones" xml:space="preserve">
-    <value>Ünite_Sayısı</value>
+    <value>ÜSayısı</value>
   </data>
   <data name="gsZoomIn" xml:space="preserve">
     <value>Yakınlaştır</value>
