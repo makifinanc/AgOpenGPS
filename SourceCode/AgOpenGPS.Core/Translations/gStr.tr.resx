@@ -139,7 +139,7 @@
     <value>Yakalama</value>
   </data>
   <data name="gsAcquireFactor" xml:space="preserve">
-    <value>Hattı Yakalama Katsayısı (0,9)</value>
+    <value>Hattı Yakalama Katsayısı</value>
   </data>
   <data name="gsActionHasBeenCancelled" xml:space="preserve">
     <value>İşlem İptal Edildi</value>
@@ -1044,7 +1044,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Aralık</value>
   </data>
   <data name="gsSpeedFactor" xml:space="preserve">
-    <value>Hız Katsayısı (1,5)</value>
+    <value>Hız Katsayısı</value>
   </data>
   <data name="gsSpeedo" xml:space="preserve">
     <value>Hız Göstergesi</value>
@@ -1080,7 +1080,7 @@ Hangi sırayla dokunursanız, menüde de o sırayla (aşağıdan yukarıya) gör
     <value>Geri Giderken Dümenleme</value>
   </data>
   <data name="gsSteerResponse" xml:space="preserve">
-    <value>Dümenleme Tepkisi (3)</value>
+    <value>Dümenleme Tepkisi</value>
   </data>
   <data name="gsSteerSwitch" xml:space="preserve">
     <value>Oto. Dümenleme Butonu</value>
