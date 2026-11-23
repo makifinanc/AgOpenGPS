@@ -1,4 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 
@@ -85,22 +85,6 @@ namespace AgOpenGPS
         private bool savedIsTurnLeft;
         private int savedRowSkipsWidth, savedTurnSkips;
         private bool savedPreviousBigSkip;
-
-        // True while howManyPathsAway / isHeadingSameWay already point at the next pass (set by YouTurnTrigger)
-        private bool isPathAdvancedForTurn;
-
-        /// <summary>
-        /// True from YouTurnTrigger until the turn completes or is cancelled. During this window
-        /// ABLine/curve howManyPathsAway and isHeadingSameWay already describe the pass after the turn,
-        /// while the vehicle and implement are still finishing the current pass or are in the headland.
-        /// </summary>
-        public bool IsPathAdvancedForTurn => isYouTurnTriggered && isPathAdvancedForTurn;
-
-        // Pass the vehicle was on when the turn was triggered
-        public int PreTriggerABLinePathsAway => savedABLinePathsAway;
-        public bool PreTriggerABLineHeadingSameWay => savedABLineHeadingSameWay;
-        public int PreTriggerCurvePathsAway => savedCurvePathsAway;
-        public bool PreTriggerCurveHeadingSameWay => savedCurveHeadingSameWay;
         #endregion
 
         //constructor
@@ -108,21 +92,21 @@ namespace AgOpenGPS
         {
             mf = _f;
 
-            uturnDistanceFromBoundary = Properties.ToolSettings.Default.set_youTurnDistanceFromBoundary;
+            uturnDistanceFromBoundary = Properties.Settings.Default.set_youTurnDistanceFromBoundary;
 
             //how far before or after boundary line should turn happen
-            youTurnStartOffset = Properties.ToolSettings.Default.set_youTurnExtensionLength;
+            youTurnStartOffset = Properties.Settings.Default.set_youTurnExtensionLength;
 
-            rowSkipsWidth = Properties.ToolSettings.Default.set_youSkipWidth;
+            rowSkipsWidth = Properties.Settings.Default.set_youSkipWidth;
             Set_Alternate_skips();
 
             ytList.Capacity = 128;
 
-            youTurnRadius = Properties.ToolSettings.Default.set_youTurnRadius;
+            youTurnRadius = Properties.Settings.Default.set_youTurnRadius;
 
-            uTurnStyle = Properties.ToolSettings.Default.set_uTurnStyle;
+            uTurnStyle = Properties.Settings.Default.set_uTurnStyle;
 
-            uTurnSmoothing = (int)Properties.ToolSettings.Default.setAS_uTurnSmoothing;
+            uTurnSmoothing = (int)Properties.Settings.Default.setAS_uTurnSmoothing;
         }
 
         //find next not worked lane after the defined lanes to skip
@@ -183,7 +167,7 @@ namespace AgOpenGPS
                     }
                 }
 
-                rowSkipsWidth = GetNextNotWorkedTrack(isTurnLeft, Properties.ToolSettings.Default.set_youSkipWidth, false);
+                rowSkipsWidth = GetNextNotWorkedTrack(isTurnLeft, Properties.Settings.Default.set_youSkipWidth, false);
             }
 
             //TODO: is calculated many taimes after the priveous turn is complete
@@ -228,7 +212,7 @@ namespace AgOpenGPS
                     }
                 }
 
-                rowSkipsWidth = GetNextNotWorkedTrack(isTurnLeft, Properties.ToolSettings.Default.set_youSkipWidth, true);
+                rowSkipsWidth = GetNextNotWorkedTrack(isTurnLeft, Properties.Settings.Default.set_youSkipWidth, true);
             }
 
             double turnOffset = (mf.tool.width - mf.tool.overlap) * rowSkipsWidth
@@ -1107,10 +1091,21 @@ namespace AgOpenGPS
                     if (firstHeadingDifference > glm.PIBy2 && firstHeadingDifference < 3 * glm.PIBy2) isFirstTurnLineSameWay = false;
 
                     //finds out start and goal point along the tunline
-                    FindInnerTurnPoints(ytList[cnt1 - 1], ytList[0].heading, inClosestTurnPt, isFirstTurnLineSameWay);
+                    //if a point is not found we must fail, otherwise a stale closestTurnPt gives a straight line
+                    if (!FindInnerTurnPoints(ytList[cnt1 - 1], ytList[0].heading, inClosestTurnPt, isFirstTurnLineSameWay))
+                    {
+                        WideTurnDebug("start point not found");
+                        FailCreate();
+                        return false;
+                    }
                     CClose startClosestTurnPt = new CClose(closestTurnPt);
 
-                    FindInnerTurnPoints(ytList2[cnt2 - 1], ytList2[0].heading + Math.PI, outClosestTurnPt, !isFirstTurnLineSameWay);
+                    if (!FindInnerTurnPoints(ytList2[cnt2 - 1], ytList2[0].heading + Math.PI, outClosestTurnPt, !isFirstTurnLineSameWay))
+                    {
+                        WideTurnDebug("goal point not found");
+                        FailCreate();
+                        return false;
+                    }
                     CClose goalClosestTurnPt = new CClose(closestTurnPt);
 
                     //we have 2 different turnLine crossings
@@ -1132,51 +1127,11 @@ namespace AgOpenGPS
                     }
                     else
                     {
-                        //multiple segments
-                        vec3 tPoint = new vec3();
-                        int turnCount = mf.bnd.bndList[startClosestTurnPt.turnLineNum].turnLine.Count;
-
-                        //how many points from turnline do we add
-                        int loops = Math.Abs(startClosestTurnPt.turnLineIndex - goalClosestTurnPt.turnLineIndex);
-
-                        //TODO: Generates error if trying to go around more than half of something...... Do we ever?
-                        //are we crossing a border?
-                        if (loops > (mf.bnd.bndList[startClosestTurnPt.turnLineNum].turnLine.Count / 2))
+                        //multiple segments - follow the turnline from start to goal
+                        if (!AppendTurnLinePath(startClosestTurnPt, goalClosestTurnPt, isFirstTurnLineSameWay))
                         {
-                            if (startClosestTurnPt.turnLineIndex < goalClosestTurnPt.turnLineIndex)
-                            {
-                                loops = (turnCount - goalClosestTurnPt.turnLineIndex) + startClosestTurnPt.turnLineIndex;
-                            }
-                            else
-                            {
-                                loops = (turnCount - startClosestTurnPt.turnLineIndex) + goalClosestTurnPt.turnLineIndex;
-                            }
-                        }
-
-                        //countExit up - start with B which is next A
-                        if (isFirstTurnLineSameWay)
-                        {
-                            for (int i = 0; i < loops; i++)
-                            {
-                                if ((startClosestTurnPt.turnLineIndex + 1) >= turnCount) startClosestTurnPt.turnLineIndex = -1;
-
-                                tPoint = mf.bnd.bndList[startClosestTurnPt.turnLineNum].turnLine[startClosestTurnPt.turnLineIndex + 1];
-                                startClosestTurnPt.turnLineIndex++;
-                                if (startClosestTurnPt.turnLineIndex >= turnCount)
-                                    startClosestTurnPt.turnLineIndex = 0;
-                                ytList.Add(tPoint);
-                            }
-                        }
-                        else //countExit down = start with A
-                        {
-                            for (int i = 0; i < loops; i++)
-                            {
-                                tPoint = mf.bnd.bndList[startClosestTurnPt.turnLineNum].turnLine[startClosestTurnPt.turnLineIndex];
-                                startClosestTurnPt.turnLineIndex--;
-                                if (startClosestTurnPt.turnLineIndex == -1)
-                                    startClosestTurnPt.turnLineIndex = turnCount - 1;
-                                ytList.Add(tPoint);
-                            }
+                            FailCreate();
+                            return false;
                         }
 
                         //add the out from ytList2
@@ -1207,22 +1162,17 @@ namespace AgOpenGPS
                     }
 
                     //calculate the new points headings based on fore and aft of point - smoother turns
-                    //keep the first and last points, they are the only ones exactly on the AB lines and the
-                    //in and out legs are extended from them. Dropping them put the legs about 1% of the turn
-                    //radius beside the lines, so the XTE jumped toward the turn side at the trigger.
                     cnt = ytList.Count;
                     vec3[] arr = new vec3[cnt];
+                    cnt -= 2;
                     ytList.CopyTo(arr);
                     ytList.Clear();
 
-                    for (int i = 0; i < cnt; i++)
+                    for (int i = 2; i < cnt; i++)
                     {
-                        int prev = Math.Max(i - 1, 0);
-                        int next = Math.Min(i + 1, cnt - 1);
-
                         vec3 pt3 = new vec3(arr[i]);
-                        pt3.heading = Math.Atan2(arr[next].easting - arr[prev].easting,
-                            arr[next].northing - arr[prev].northing);
+                        pt3.heading = Math.Atan2(arr[i + 1].easting - arr[i - 1].easting,
+                            arr[i + 1].northing - arr[i - 1].northing);
                         if (pt3.heading < 0) pt3.heading += glm.twoPI;
                         ytList.Add(pt3);
                     }
@@ -2486,7 +2436,6 @@ namespace AgOpenGPS
                 savedRowSkipsWidth = rowSkipsWidth;
                 savedTurnSkips = turnSkips;
                 savedPreviousBigSkip = previousBigSkip;
-                isPathAdvancedForTurn = true;
 
                 mf.curve.howManyPathsAway += (isTurnLeft ^ mf.curve.isHeadingSameWay) ? rowSkipsWidth : -rowSkipsWidth;
                 mf.curve.isHeadingSameWay = !mf.curve.isHeadingSameWay;
@@ -2523,14 +2472,12 @@ namespace AgOpenGPS
             rowSkipsWidth = savedRowSkipsWidth;
             turnSkips = savedTurnSkips;
             previousBigSkip = savedPreviousBigSkip;
-            isPathAdvancedForTurn = false;
         }
 
         //Normal copmpletion of youturn
         public void CompleteYouTurn()
         {
             isYouTurnTriggered = false;
-            isPathAdvancedForTurn = false;
             ResetCreatedYouTurn();
             mf.sounds.isBoundAlarming = false;
         }
@@ -2547,7 +2494,6 @@ namespace AgOpenGPS
         {
             //fix you turn
             isYouTurnTriggered = false;
-            isPathAdvancedForTurn = false;
             mf.makeUTurnCounter = 0;
             ytList?.Clear();
             ResetCreatedYouTurn();
