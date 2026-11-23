@@ -1080,13 +1080,18 @@ namespace AgOpenGPS
                             //distance from current pivot to first point of youturn pattern
                             distancePivotToTurnLine = glm.Distance(yt.ytList[2], pivotAxlePos);
 
-                            if ((distancePivotToTurnLine <= 20.0) && (distancePivotToTurnLine >= 18.0) && !yt.isYouTurnTriggered)
-
-                                if (!sounds.isBoundAlarming)
-                                {
-                                    if (sounds.isTurnSoundOn) sounds.sndBoundaryAlarm.Play();
-                                    sounds.isBoundAlarming = true;
-                                }
+                            if ((distancePivotToTurnLine <= 25.0) && (distancePivotToTurnLine > 1.0) && !yt.isYouTurnTriggered)
+{
+    if (!sounds.isBoundAlarming)
+    {
+        if (sounds.isTurnSoundOn) sounds.sndBoundaryAlarm.Play();
+        sounds.isBoundAlarming = true;
+    }
+}
+else if (distancePivotToTurnLine > 26.0)
+{
+    sounds.isBoundAlarming = false;
+}
 
                             //if we are close enough to pattern, trigger.
                             if ((distancePivotToTurnLine <= 1.0) && (distancePivotToTurnLine >= 0) && !yt.isYouTurnTriggered)
