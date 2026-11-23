@@ -1,4 +1,4 @@
-﻿using AgLibrary.Logging;
+using AgLibrary.Logging;
 using AgOpenGPS;
 using AgOpenGPS.Core.Drawing;
 using AgOpenGPS.Core.DrawLib;
@@ -741,45 +741,26 @@ namespace AgOpenGPS
                 tmrWatchdog.Enabled = false;
                 fileSaveCounter = 0;
 
-                string autoSaveStep = "";
-                try
-                {
-                    //don't save if no gps, and never persist in Easy Drive mode
-                    if (isJobStarted && !isEasyDriveMode)
-                    {
-                        autoSaveStep = "origin check";
-                        DistanceToFieldOriginCheck();
+                DistanceToFieldOriginCheck();
 
-                        //auto save the field patches, contours accumulated so far
-                        autoSaveStep = "sections";
-                        FileSaveSections();
-                        autoSaveStep = "contour";
-                        FileSaveContour();
-
-                        //NMEA elevation file
-                        if (isLogElevation && sbGrid.Length > 0)
-                        {
-                            autoSaveStep = "elevation";
-                            FileSaveElevation();
-                        }
-
-                        //ExportFieldAs_KML();
-                    }
-                }
-                catch (Exception ex)
+                //don't save if no gps, and never persist in Easy Drive mode
+                if (isJobStarted && !isEasyDriveMode)
                 {
-                    //log the failing step, then rethrow so the error is still shown
-                    Log.EventWriter($"Autosave failed at step '{autoSaveStep}' in '{currentFieldDirectory}': " +
-                        $"{ex.GetType().FullName} (HResult 0x{ex.HResult:X8}): {ex.Message.Replace('\r', ' ').Replace('\n', ' ')}");
-                    throw;
+                    //auto save the field patches, contours accumulated so far
+                    FileSaveSections();
+                    FileSaveContour();
+
+                    //NMEA elevation file
+                    if (isLogElevation && sbGrid.Length > 0) FileSaveElevation();
+
+                    //ExportFieldAs_KML();
                 }
-                finally
-                {
-                    //set saving flag off and always restart the watchdog timer, even if a save failed.
-                    //Otherwise the timer stays off, secondsSinceStart stops and the guidance lines stop updating.
-                    isSavingFile = false;
-                    tmrWatchdog.Enabled = true;
-                }
+
+                //set saving flag off
+                isSavingFile = false;
+
+                //go see if data ready for draw and position updates
+                tmrWatchdog.Enabled = true;
 
                 //calc overlap
                 oglZoom.Refresh();
@@ -936,7 +917,8 @@ namespace AgOpenGPS
             #region Lookahead
 
             //determine where the tool is wrt to headland
-            if (bnd.isHeadlandOn) bnd.WhereAreToolCorners(); else bnd.isHeadlandTurnLocked = false;
+            if (bnd.isHeadlandOn) bnd.WhereAreToolCorners();
+            else bnd.isHeadlandTurnLocked = false;
 
             //set the look ahead for hyd Lift in pixels per second
             vehicle.hydLiftLookAheadDistanceLeft = tool.farLeftSpeed * vehicle.hydLiftLookAheadTime * 10;
@@ -2448,8 +2430,7 @@ namespace AgOpenGPS
                 ScreenTextures.MenuShowHide.Draw(menuShowHideCoord, menuShowHideCoord + sizeDelta);
 
                 center += 50;
-                if (isDebugOn)
-                    font.DrawText(center - 56, hite - 72, "x" + gridToolSpacing.ToString(), 1);
+                font.DrawText(center - 56, hite - 72, "x" + gridToolSpacing.ToString(), 1);
             }
 
             center = oglMain.Width / -2 + 10;
@@ -2458,17 +2439,13 @@ namespace AgOpenGPS
             string strHeading = (deg).ToString("N1");
             int lenth = 18 * strHeading.Length;
 
-            // Debug values, only shown when the debug option is on
-            if (isDebugOn)
-            {
-                GL.Color3(0.9852f, 0.982f, 0.983f);
-                font.DrawText(oglMain.Width / 2 - lenth, 10, strHeading, 1);
+            GL.Color3(0.9852f, 0.982f, 0.983f);
+            font.DrawText(oglMain.Width / 2 - lenth, 10, strHeading, 1);
 
-                //GPS Step
-                if (distanceCurrentStepFixDisplay < 0.03 * 100)
-                    GL.Color3(0.98f, 0.82f, 0.653f);
-                font.DrawText(center, 10, distanceCurrentStepFixDisplay.ToString("N1") + "cm", 1);
-            }
+            //GPS Step
+            if (distanceCurrentStepFixDisplay < 0.03 * 100)
+                GL.Color3(0.98f, 0.82f, 0.653f);
+            font.DrawText(center, 10, distanceCurrentStepFixDisplay.ToString("N1") + "cm", 1);
 
             if (isMaxAngularVelocity)
             {
