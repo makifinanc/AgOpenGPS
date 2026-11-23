@@ -566,7 +566,7 @@ namespace AgOpenGPS
                     }
                     else if (Program.IsPreRelease)
                     {
-                        DrawVersion("Beta Testing v" + Program.SemVer);
+                        DrawVersion("~makifinanc beta v" + Program.SemVer.Split('-')[0]);
                     }
 
                     if (bnd.isHeadlandOn && isHeadlandDistanceOn)
@@ -936,7 +936,7 @@ namespace AgOpenGPS
             #region Lookahead
 
             //determine where the tool is wrt to headland
-            if (bnd.isHeadlandOn) bnd.WhereAreToolCorners();
+            if (bnd.isHeadlandOn) bnd.WhereAreToolCorners(); else bnd.isHeadlandTurnLocked = false;
 
             //set the look ahead for hyd Lift in pixels per second
             vehicle.hydLiftLookAheadDistanceLeft = tool.farLeftSpeed * vehicle.hydLiftLookAheadTime * 10;
@@ -1071,7 +1071,7 @@ namespace AgOpenGPS
             GetOutTool: //goto
 
                 //is the tool completely in the headland or not
-                bnd.isToolInHeadland = bnd.isToolOuterPointsInHeadland && !isHeadlandClose;
+                bnd.isToolInHeadland = bnd.isHeadlandTurnLocked || (bnd.isToolOuterPointsInHeadland && !isHeadlandClose);
 
                 bnd.SetHydPosition();
             }
@@ -1195,14 +1195,14 @@ namespace AgOpenGPS
                         GetOutHdOn:
 
                             //determine if look ahead points are completely in headland
-                            if (section[j].isSectionRequiredOn && section[j].isLookOnInHeadland && !isHeadlandInLookOn)
+                            if (section[j].isSectionRequiredOn && (bnd.isHeadlandTurnLocked || (section[j].isLookOnInHeadland && !isHeadlandInLookOn)))
                             {
                                 section[j].isSectionRequiredOn = false;
                                 section[j].sectionOffRequest = true;
                                 section[j].sectionOnRequest = false;
                             }
 
-                            if (section[j].isSectionRequiredOn && !section[j].isLookOnInHeadland && isHeadlandInLookOn)
+                            if (!bnd.isHeadlandTurnLocked && section[j].isSectionRequiredOn && !section[j].isLookOnInHeadland && isHeadlandInLookOn)
                             {
                                 section[j].isSectionRequiredOn = true;
                                 section[j].sectionOffRequest = false;
@@ -2608,7 +2608,7 @@ namespace AgOpenGPS
         private void DrawVersion(string version)
         {
             GL.Color3(1f, 1f, 1f);
-            font.DrawText(-oglMain.Width / 2.1, oglMain.Height / 1.2, version, 0.8);
+            font.DrawText(-oglMain.Width / 2.1, oglMain.Height / 1.4, version, 0.8);
         }
 
         private void DrawAge()
