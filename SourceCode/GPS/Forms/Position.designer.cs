@@ -1,4 +1,4 @@
-﻿//Please, if you use this, share the improvements
+//Please, if you use this, share the improvements
 
 using AgLibrary.Logging;
 using AgOpenGPS.Core.Models;
@@ -822,17 +822,17 @@ namespace AgOpenGPS
             else
             {
                 //auto track routine
-                if (trk.isAutoTrack && !isBtnAutoSteerOn)
+                if (trk.isAutoTrack && !isBtnAutoSteerOn && trk.autoTrack3SecTimer >= 1)
                 {
+                    trk.autoTrack3SecTimer = 0;
                     int lastIndex = trk.idx;
-                    trk.idx = trk.UpdateAutoTrack(pivotAxlePos, isReverse, avgSpeed);
+                    trk.idx = trk.FindClosestRefTrack(steerAxlePos);
                     if (lastIndex != trk.idx)
                     {
                         curve.isCurveValid = false;
                         ABLine.isABValid = false;
                     }
                 }
-                else trk.isAutoTrackHoldingPass = false;
 
                 //like normal
                 if (trk.gArr != null && trk.gArr.Count > 0 && trk.idx >= 0 && trk.idx < trk.gArr.Count)
@@ -854,9 +854,6 @@ namespace AgOpenGPS
 
             //if the whole path driving driving process is green
             if (recPath.isDrivingRecordedPath) recPath.UpdatePosition();
-
-            // Outside the free drive check, listeners need the track context in both modes
-            isobus.SendGuidanceTrackContext();
 
             // If Drive button off - normal autosteer 
             if (!vehicle.isInFreeDriveMode)
@@ -1081,17 +1078,17 @@ namespace AgOpenGPS
                             distancePivotToTurnLine = glm.Distance(yt.ytList[2], pivotAxlePos);
 
                             if ((distancePivotToTurnLine <= 25.0) && (distancePivotToTurnLine > 1.0) && !yt.isYouTurnTriggered)
-{
-    if (!sounds.isBoundAlarming)
-    {
-        if (sounds.isTurnSoundOn) sounds.sndBoundaryAlarm.Play();
-        sounds.isBoundAlarming = true;
-    }
-}
-else if (distancePivotToTurnLine > 26.0)
-{
-    sounds.isBoundAlarming = false;
-}
+                            {
+                                if (!sounds.isBoundAlarming)
+                                {
+                                    if (sounds.isTurnSoundOn) sounds.sndBoundaryAlarm.Play();
+                                    sounds.isBoundAlarming = true;
+                                }
+                            }
+                            else if (distancePivotToTurnLine > 26.0)
+                            {
+                                sounds.isBoundAlarming = false;
+                            }
 
                             //if we are close enough to pattern, trigger.
                             if ((distancePivotToTurnLine <= 1.0) && (distancePivotToTurnLine >= 0) && !yt.isYouTurnTriggered)
