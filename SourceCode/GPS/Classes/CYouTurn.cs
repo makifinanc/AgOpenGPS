@@ -721,10 +721,21 @@ namespace AgOpenGPS
                     if (firstHeadingDifference > glm.PIBy2 && firstHeadingDifference < 3 * glm.PIBy2) isFirstTurnLineSameWay = false;
 
                     //finds out start and goal point along the tunline
-                    FindInnerTurnPoints(ytList[cnt1 - 1], ytList[0].heading, inClosestTurnPt, isFirstTurnLineSameWay);
+                    //if a point is not found we must fail, otherwise a stale closestTurnPt gives a straight line
+                    if (!FindInnerTurnPoints(ytList[cnt1 - 1], ytList[0].heading, inClosestTurnPt, isFirstTurnLineSameWay))
+                    {
+                        WideTurnDebug("start point not found");
+                        FailCreate();
+                        return false;
+                    }
                     CClose startClosestTurnPt = new CClose(closestTurnPt);
 
-                    FindInnerTurnPoints(ytList2[cnt2 - 1], ytList2[0].heading + Math.PI, outClosestTurnPt, !isFirstTurnLineSameWay);
+                    if (!FindInnerTurnPoints(ytList2[cnt2 - 1], ytList2[0].heading + Math.PI, outClosestTurnPt, !isFirstTurnLineSameWay))
+                    {
+                        WideTurnDebug("goal point not found");
+                        FailCreate();
+                        return false;
+                    }
                     CClose goalClosestTurnPt = new CClose(closestTurnPt);
 
                     //we have 2 different turnLine crossings
@@ -745,50 +756,11 @@ namespace AgOpenGPS
                     }
                     else
                     {
-                        //mulitple segments
-                        vec3 tPoint = new vec3();
-                        int turnCount = mf.bnd.bndList[startClosestTurnPt.turnLineNum].turnLine.Count;
-
-                        //how many points from turnline do we add
-                        int loops = Math.Abs(startClosestTurnPt.turnLineIndex - goalClosestTurnPt.turnLineIndex);
-
-                        //are we crossing a border?
-                        if (loops > (mf.bnd.bndList[startClosestTurnPt.turnLineNum].turnLine.Count / 2))
+                        //multiple segments - follow the turnline from start to goal
+                        if (!AppendTurnLinePath(startClosestTurnPt, goalClosestTurnPt, isFirstTurnLineSameWay))
                         {
-                            if (startClosestTurnPt.turnLineIndex < goalClosestTurnPt.turnLineIndex)
-                            {
-                                loops = (turnCount - goalClosestTurnPt.turnLineIndex) + startClosestTurnPt.turnLineIndex;
-                            }
-                            else
-                            {
-                                loops = (turnCount - startClosestTurnPt.turnLineIndex) + goalClosestTurnPt.turnLineIndex;
-                            }
-                        }
-
-                        //countExit up - start with B which is next A
-                        if (isFirstTurnLineSameWay)
-                        {
-                            for (int i = 0; i < loops; i++)
-                            {
-                                if ((startClosestTurnPt.turnLineIndex + 1) >= turnCount) startClosestTurnPt.turnLineIndex = -1;
-
-                                tPoint = mf.bnd.bndList[startClosestTurnPt.turnLineNum].turnLine[startClosestTurnPt.turnLineIndex + 1];
-                                startClosestTurnPt.turnLineIndex++;
-                                if (startClosestTurnPt.turnLineIndex >= turnCount)
-                                    startClosestTurnPt.turnLineIndex = 0;
-                                ytList.Add(tPoint);
-                            }
-                        }
-                        else //countExit down = start with A
-                        {
-                            for (int i = 0; i < loops; i++)
-                            {
-                                tPoint = mf.bnd.bndList[startClosestTurnPt.turnLineNum].turnLine[startClosestTurnPt.turnLineIndex];
-                                startClosestTurnPt.turnLineIndex--;
-                                if (startClosestTurnPt.turnLineIndex == -1)
-                                    startClosestTurnPt.turnLineIndex = turnCount - 1;
-                                ytList.Add(tPoint);
-                            }
+                            FailCreate();
+                            return false;
                         }
 
                         //add the out from ytList2
@@ -1951,49 +1923,111 @@ namespace AgOpenGPS
             return false;
         }
 
+        private static int Mod(int v, int m)
+        {
+            int r = v % m;
+            return r < 0 ? r + m : r;
+        }
+
+        //add the turnline points between start and goal segment in the travel direction.
+        //Uses modulo on the segment count, so it also works across the ring start and does not depend
+        //on how many points the turnline has on a straight or a curved part.
+        private bool AppendTurnLinePath(CClose start, CClose goal, bool isSameWay)
+        {
+            List<vec3> ring = mf.bnd.bndList[start.turnLineNum].turnLine;
+
+            //last point of the ring is a copy of the first
+            int seg = ring.Count - 1;
+            if (seg < 2) return false;
+
+            int s = start.turnLineIndex;
+            int g = goal.turnLineIndex;
+            int loops = isSameWay ? Mod(g - s, seg) : Mod(s - g, seg);
+
+            double ringLength = 0;
+            for (int i = 0; i < seg; i++) ringLength += glm.Distance(ring[i], ring[i + 1]);
+
+            double pathLength = 0;
+            vec3 prev = ytList[ytList.Count - 1];
+
+            for (int k = 0; k < loops; k++)
+            {
+                //up: start with B which is next A, down: start with A
+                int idx = isSameWay ? Mod(s + 1 + k, seg) : Mod(s - k, seg);
+                vec3 tPoint = ring[idx];
+                pathLength += glm.Distance(prev, tPoint);
+                prev = tPoint;
+                ytList.Add(tPoint);
+            }
+
+            WideTurnDebug("path start seg " + s + " goal seg " + g + " loops " + loops + " ringPts " + ring.Count
+                + " sameWay " + isSameWay + " pathLen " + pathLength.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)
+                + " ringLen " + ringLength.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture));
+
+            //more than half way around the field means the direction was wrong
+            return pathLength <= ringLength * 0.5;
+        }
+
+        //temporary debug log next to the exe, set to false when done testing
+        private static readonly bool wideTurnDebug = false;
+
+        private void WideTurnDebug(string msg)
+        {
+            if (!wideTurnDebug) return;
+            try
+            {
+                System.IO.File.AppendAllText(
+                    System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "youturn_debug.txt"),
+                    DateTime.Now.ToString("HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)
+                    + " skips " + rowSkipsWidth + " radius " + youTurnRadius.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)
+                    + " : " + msg + "\r\n");
+            }
+            catch (Exception) { }
+        }
+
         private bool FindInnerTurnPoints(vec3 fromPt, double inDirection, CClose refClosePt, bool isTurnLineSameWay)
         {
-            double eP, nP;
+            //first try the original 1 m ray, then a longer one, because on a slanted turnline
+            //the end of the half circle can be further away than 1 m
+            double[] rayLengths = { 1.0, youTurnRadius, youTurnRadius * 3.0 };
 
-            eP = fromPt.easting + Math.Sin(inDirection);
-            nP = fromPt.northing + Math.Cos(inDirection);
+            List<vec3> ring = mf.bnd.bndList[refClosePt.turnLineNum].turnLine;
+            int seg = ring.Count - 1;
+            if (seg < 2) return false;
 
             int a = isTurnLineSameWay ? 1 : -1;
-
-            int turnLineIndex = refClosePt.turnLineIndex;
             int turnLineNum = refClosePt.turnLineNum;
-            int stopTurnLineIndex = refClosePt.turnLineIndex - a;
-            if (stopTurnLineIndex < 0) stopTurnLineIndex = mf.bnd.bndList[turnLineNum].turnLine.Count - 3;
-            if (stopTurnLineIndex > mf.bnd.bndList[turnLineNum].turnLine.Count - 1) turnLineIndex = 3;
 
-
-            for (; turnLineIndex != stopTurnLineIndex; turnLineIndex += a)
+            for (int r = 0; r < rayLengths.Length; r++)
             {
-                if (turnLineIndex < 0) turnLineIndex = mf.bnd.bndList[turnLineNum].turnLine.Count - 2;
-                if (turnLineIndex > mf.bnd.bndList[turnLineNum].turnLine.Count - 2) turnLineIndex = 0;
+                double eP = fromPt.easting + Math.Sin(inDirection) * rayLengths[r];
+                double nP = fromPt.northing + Math.Cos(inDirection) * rayLengths[r];
 
-
-                int res = GetLineIntersection(
-                                mf.bnd.bndList[turnLineNum].turnLine[turnLineIndex].easting,
-                                mf.bnd.bndList[turnLineNum].turnLine[turnLineIndex].northing,
-                                mf.bnd.bndList[turnLineNum].turnLine[turnLineIndex + 1].easting,
-                                mf.bnd.bndList[turnLineNum].turnLine[turnLineIndex + 1].northing,
-
-                                fromPt.easting,
-                                fromPt.northing, eP, nP, ref iE, ref iN);
-                if (res == 1)
+                //walk along the turnline in travel direction, every segment once
+                for (int n = 0; n < seg; n++)
                 {
-                    closestTurnPt = new CClose();
-                    closestTurnPt.closePt.easting = iE;
-                    closestTurnPt.closePt.northing = iN;
-                    closestTurnPt.closePt.heading = -1; //isnt needed but could be calculated
-                    closestTurnPt.turnLineIndex = turnLineIndex;
-                    closestTurnPt.curveIndex = -1;
-                    closestTurnPt.turnLineHeading = mf.bnd.bndList[turnLineNum].turnLine[turnLineIndex].heading;
-                    closestTurnPt.turnLineNum = turnLineNum;
-                    return true;
-                }
+                    int turnLineIndex = Mod(refClosePt.turnLineIndex + a * n, seg);
 
+                    int res = GetLineIntersection(
+                                    ring[turnLineIndex].easting,
+                                    ring[turnLineIndex].northing,
+                                    ring[turnLineIndex + 1].easting,
+                                    ring[turnLineIndex + 1].northing,
+                                    fromPt.easting, fromPt.northing, eP, nP, ref iE, ref iN);
+                    if (res == 1)
+                    {
+                        closestTurnPt = new CClose();
+                        closestTurnPt.closePt.easting = iE;
+                        closestTurnPt.closePt.northing = iN;
+                        closestTurnPt.closePt.heading = -1; //isnt needed but could be calculated
+                        closestTurnPt.turnLineIndex = turnLineIndex;
+                        closestTurnPt.curveIndex = -1;
+                        closestTurnPt.turnLineHeading = ring[turnLineIndex].heading;
+                        closestTurnPt.turnLineNum = turnLineNum;
+                        if (r > 0) WideTurnDebug("inner point found only with ray " + rayLengths[r].ToString("0.0", System.Globalization.CultureInfo.InvariantCulture));
+                        return true;
+                    }
+                }
             }
             return false;
         }
