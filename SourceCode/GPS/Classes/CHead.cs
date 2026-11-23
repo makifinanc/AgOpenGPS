@@ -7,10 +7,60 @@ namespace AgOpenGPS
         public bool isHeadlandOn;
 
         public bool isToolInHeadland,
-            isToolOuterPointsInHeadland, isSectionControlledByHeadland;
+            isToolOuterPointsInHeadland, isSectionControlledByHeadland,
+            isHeadlandTurnLocked;
 
         public vec2? HeadlandNearestPoint { get; private set; } = null;
         public double? HeadlandDistance { get; private set; } = null;
+
+        public bool IsHeadlandTurnLocked()
+        {
+            if (!isHeadlandOn || bndList.Count == 0 || bndList[0].hdLine.Count == 0)
+                return false;
+
+            if (mf.ct.isContourBtnOn || mf.trk.gArr == null || mf.trk.idx < 0 || mf.trk.idx >= mf.trk.gArr.Count)
+                return false;
+
+            bool inOrTouchingHeadland =
+                !IsPointInsideHeadArea(mf.pivotAxlePos.ToVec2())
+                || !IsPointInsideHeadArea(mf.toolPivotPos.ToVec2())
+                || mf.tool.isLeftSideInHeadland
+                || mf.tool.isRightSideInHeadland
+                || mf.yt.isYouTurnTriggered;
+
+            if (!inOrTouchingHeadland)
+                return false;
+
+            double targetHeading;
+            if (mf.trk.gArr[mf.trk.idx].mode == TrackMode.AB)
+            {
+                targetHeading = mf.ABLine.abHeading;
+            }
+            else
+            {
+                if (mf.curve.curList == null || mf.curve.curList.Count == 0)
+                    return false;
+
+                double minDistSq = double.MaxValue;
+                int bestIdx = -1;
+                for (int i = 0; i < mf.curve.curList.Count; i++)
+                {
+                    double dSq = glm.DistanceSquared(mf.pivotAxlePos, mf.curve.curList[i]);
+                    if (dSq < minDistSq)
+                    {
+                        minDistSq = dSq;
+                        bestIdx = i;
+                    }
+                }
+                if (bestIdx < 0) return false;
+                targetHeading = mf.curve.curList[bestIdx].heading;
+            }
+
+            double diff = Math.Abs(mf.pivotAxlePos.heading - targetHeading) % Math.PI;
+            if (diff > glm.PIBy2) diff = Math.PI - diff;
+
+            return diff > glm.toRadians(10.0);
+        }
 
         public void SetHydPosition()
         {
@@ -61,6 +111,13 @@ namespace AgOpenGPS
 
                 //is the tool in or out based on endpoints
                 isToolOuterPointsInHeadland = mf.tool.isLeftSideInHeadland && mf.tool.isRightSideInHeadland;
+
+                //10 derece yastikbasi donus kilidi
+                isHeadlandTurnLocked = IsHeadlandTurnLocked();
+            }
+            else
+            {
+                isHeadlandTurnLocked = false;
             }
         }
 
@@ -137,31 +194,7 @@ namespace AgOpenGPS
             HeadlandNearestPoint = nearestVal;
             HeadlandDistance = distance;
 
-            bool isInside = bndList[0].hdLine.IsPointInPolygon(vehiclePos.ToVec2());
-
-            double dx = nearestVal.easting - vehiclePos.easting;
-            double dy = nearestVal.northing - vehiclePos.northing;
-            double angleToPolygon = Math.Atan2(dx, dy);
-            double headingDiff = glm.AngleDiff(vehiclePos.heading, angleToPolygon);
-            bool headingOk = headingDiff < glm.toRadians(60); // eventueel verwijderen: zit al in GetClosestPointInFront
-
-            // Warning Logic
-            bool shouldPlay =
-                (isInside && headingOk && distance < 20.0) ||
-                (!isInside && headingOk && distance < 5.0);
-
-            if (shouldPlay && mf.isHeadlandDistanceOn)
-            {
-                if (!mf.sounds.isBoundAlarming)
-                {
-                    mf.sounds.sndHeadland.Play();
-                    mf.sounds.isBoundAlarming = true;
-                }
-            }
-            else
-            {
-                mf.sounds.isBoundAlarming = false;
-            }
+            // Yastikbasi yaklasma sesi devre disi (U-donus alarmi ile isBoundAlarming cakismasini onlemek icin)
         }
 
     }
